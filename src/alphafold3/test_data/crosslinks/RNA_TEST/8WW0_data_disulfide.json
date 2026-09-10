@@ -1,0 +1,27 @@
+{
+  "dialect": "alphafold3",
+  "version": 1,
+  "name": "rna_test",
+  "sequences": [
+    {
+      "rna": {
+        "id": "A",
+        "sequence": "AUGGUCUGAUCUAGUCUAGUCAUCUGAUCGUGUGAUCUGUGACUGAUGUCAGUCGUACGAUCGAUGCGGAUCGGUAUCGACUAGCUGCAU",
+        "unpairedMsa": ""
+      }
+    }
+  ],
+  "modelSeeds": [
+    1
+  ],
+  "bondedAtomPairs": null,
+  "userCCD": null,
+  "crosslinks": [
+      {
+          "name": "RNALINK5",
+		  "residue_pairs": [
+              [["A", 2], ["A", 32]]
+          ]
+      }
+  ]
+}

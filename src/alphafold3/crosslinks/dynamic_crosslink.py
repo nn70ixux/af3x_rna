@@ -47,6 +47,20 @@ _LAST_SIDECHAIN_BOND = {
         }.items()
     ],
 }
+# This dictionary specifies at which atom in the RNA molecule the ligand/crosslinker is attached
+# In this simple specification we use just the Oxygen of the 2' OH group
+_LAST_RNA_BOND = {
+    "moltype": "rna",
+    "atomtypes": [
+        {"restype": restype, "atomname": atomname}
+        for restype, atomname in {
+            "A": "O2'",
+            "C": "O2'",
+            "G": "O2'",
+            "U": "O2'",
+        }.items()
+    ],
+}
 
 REGISTERED_LINK_TYPES ={}
 
@@ -186,4 +200,81 @@ def flexlink_definition(xlinkname: str) -> Dict:
             **bonds_dict
         }
     }
+    return definition
+
+# The RNA linker is registered
+@register_dynamic_link("RNALINK")
+@functools.cache
+def rnalink_definition(xlinkname:str) -> Dict:
+    # This extracts the number of C atoms to put between the two bonded residues
+    _, n = dynamic_xlinkname_processing(xlinkname)
+    # This generates a simple smiles of a CN chain and generates a cif file from it
+    smiles = n * 'C'
+    ccd_cif = ccd_from_smiles(smiles, xlinkname)
+    # Here we simply select the first and last atom of the linker
+    atom1, atom2 = 'C1', f'C{n}'
+    
+    # Provide AF3 with enough information about the crosslinking atoms
+    atom2_bond1, atom2_bond2 = (
+            {"moltype": "ligand", "restype": xlinkname, "atomname": cross_atom}
+            for cross_atom in (atom1, atom2)
+    )
+    # Here we define what residues are allowed to connect to the crosslinker and with which atom they do
+    # We allow the crosslinker to connect to all RNA Nucleotides
+    bonds_dict = {
+            "bond1": {
+                "atom1": _LAST_RNA_BOND,
+                "atom2": atom2_bond1,
+                },
+            "bond2": {
+                "atom1": _LAST_RNA_BOND,
+                "atom2": atom2_bond2
+                }
+            }
+    definition = {
+            xlinkname: {
+                "ccdCode": xlinkname,
+                "userCCD": str(ccd_cif),
+                **bonds_dict
+                }
+            }
+    return definition
+
+
+# The RNA linker is registered
+@register_dynamic_link("PRNALINK")
+@functools.cache
+def prnalink_definition(xlinkname:str) -> Dict:
+    # This extracts the number of C atoms to put between the two bonded residues
+    _, n = dynamic_xlinkname_processing(xlinkname)
+    # This generates a simple smiles of a CN chain and generates a cif file from it
+    smiles = n * 'C'
+    ccd_cif = ccd_from_smiles(smiles, xlinkname)
+    # Here we simply select the first and last atom of the linker
+    atom1, atom2 = 'C1', f'C{n}'
+    
+    # Provide AF3 with enough information about the crosslinking atoms
+    atom2_bond1, atom2_bond2 = (
+            {"moltype": "ligand", "restype": xlinkname, "atomname": cross_atom}
+            for cross_atom in (atom1, atom2)
+    )
+    # Here we define what residues are allowed to connect to the crosslinker and with which atom they do
+    # We allow the crosslinker to connect to all RNA Nucleotides
+    bonds_dict = {
+            "bond1": {
+                "atom1": _LAST_SIDECHAIN_BOND,
+                "atom2": atom2_bond1,
+                },
+            "bond2": {
+                "atom1": _LAST_RNA_BOND,
+                "atom2": atom2_bond2
+                }
+            }
+    definition = {
+            xlinkname: {
+                "ccdCode": xlinkname,
+                "userCCD": str(ccd_cif),
+                **bonds_dict
+                }
+            }
     return definition

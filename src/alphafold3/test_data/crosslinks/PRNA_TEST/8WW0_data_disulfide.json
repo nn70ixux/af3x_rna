@@ -1,0 +1,36 @@
+{
+  "dialect": "alphafold3",
+  "version": 1,
+  "name": "prna_test",
+  "sequences": [
+    {
+      "rna": {
+        "id": "B",
+        "sequence": "AUGGUCUGAUCUAGUCUAGUCAUCUGAUCGUGUGAUCUGUGACUGAUGUCAGUCGUACGAUCGAUGCGGAUCGGUAUCGACUAGCUGCAU",
+        "unpairedMsa": ""
+      }
+    },
+	{
+		"protein": {
+			"id": "A",
+			"sequence": "SCPGECNCHWELFCEEGRLCTGYRHCVCPPSC",
+			"unpairedMsa": "",
+			"pairedMsa": "",
+			"templates": []
+		}
+	}
+  ],
+  "modelSeeds": [
+    1
+  ],
+  "bondedAtomPairs": null,
+  "userCCD": null,
+  "crosslinks": [
+      {
+          "name": "PRNALINK10",
+		  "residue_pairs": [
+              [["A", 2], ["B", 32]]
+          ]
+      }
+  ]
+}

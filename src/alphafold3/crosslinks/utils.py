@@ -99,6 +99,9 @@ class LinkHandler:
         id_to_chain = {chain.id: chain for chain in self.chains}
         # for residue1, residue2 in self.residue_pairs:
         for (chain_id1, resid1), (chain_id2, resid2) in self.residue_pairs:
+            # For RNA compatibility we just need to remove the matching of
+            # three letter code to one letter code, the rest is automatically 
+            # handled by the link definitions
             residue1 = xutils.Residue(
                 chain_id1,
                 resid1,
@@ -112,6 +115,104 @@ class LinkHandler:
                 residue_names.PROTEIN_COMMON_ONE_TO_THREE[
                     id_to_chain[chain_id2].sequence[resid2 - 1]
                 ]
+            )
+
+            bond1_atom1, bond1_atom2, bond2_atom1, bond2_atom2 = \
+                self.validate_and_get_bond_info(residue1, residue2)
+            new_ligand_id = get_unused_chain_id(used_chain_ids)
+            ligand_ids.append(new_ligand_id)
+            used_chain_ids.append(new_ligand_id)
+
+            pair1 = ((residue1.chain_id, residue1.resid, bond1_atom1),
+                     (new_ligand_id, ligand_resid, bond1_atom2))
+            pair2 = ((residue2.chain_id, residue2.resid, bond2_atom1),
+                     (new_ligand_id, ligand_resid, bond2_atom2))
+            bond_pairs.extend([pair1, pair2])
+        return bond_pairs, ligand_ids
+
+    def create_bonded_atom_pairs_rna(
+        self,
+        used_chain_ids: List[str]
+    ) -> Tuple[List[Tuple[BondAtomId, BondAtomId]], List[str]]:
+        """
+        For each residue pair, validates the residues and creates bonded atom pairs.
+        For each pair ((residue1, residue2)):
+          - Validates the residues using validate_and_get_bond_info.
+          - Generates a new ligand chain ID.
+          - Creates two bond pairs:
+                ((residue1.chain_id, residue1.resid, bond_atom1),
+                 (new_ligand_id, ligand_resid, bond_atom2))
+                ((residue2.chain_id, residue2.resid, bond_atom3),
+                 (new_ligand_id, ligand_resid, bond_atom4))
+        Returns:
+          A tuple of (list of bonded atom pairs, list of newly generated ligand chain IDs).
+        """
+        bond_pairs = []
+        ligand_ids = []
+        ligand_resid = 1
+        id_to_chain = {chain.id: chain for chain in self.chains}
+        # for residue1, residue2 in self.residue_pairs:
+        for (chain_id1, resid1), (chain_id2, resid2) in self.residue_pairs:
+            residue1 = xutils.Residue(
+                chain_id1,
+                resid1,
+                id_to_chain[chain_id1].sequence[resid1 - 1]
+            )
+            residue2 = xutils.Residue(
+                chain_id2,
+                resid2,
+                id_to_chain[chain_id2].sequence[resid2 - 1]
+            )
+
+            bond1_atom1, bond1_atom2, bond2_atom1, bond2_atom2 = \
+                self.validate_and_get_bond_info(residue1, residue2)
+            new_ligand_id = get_unused_chain_id(used_chain_ids)
+            ligand_ids.append(new_ligand_id)
+            used_chain_ids.append(new_ligand_id)
+
+            pair1 = ((residue1.chain_id, residue1.resid, bond1_atom1),
+                     (new_ligand_id, ligand_resid, bond1_atom2))
+            pair2 = ((residue2.chain_id, residue2.resid, bond2_atom1),
+                     (new_ligand_id, ligand_resid, bond2_atom2))
+            bond_pairs.extend([pair1, pair2])
+        return bond_pairs, ligand_ids
+    def create_bonded_atom_pairs_prna(
+        self,
+        used_chain_ids: List[str]
+    ) -> Tuple[List[Tuple[BondAtomId, BondAtomId]], List[str]]:
+        """
+        For each residue pair, validates the residues and creates bonded atom pairs.
+        For each pair ((residue1, residue2)):
+          - Validates the residues using validate_and_get_bond_info.
+          - Generates a new ligand chain ID.
+          - Creates two bond pairs:
+                ((residue1.chain_id, residue1.resid, bond_atom1),
+                 (new_ligand_id, ligand_resid, bond_atom2))
+                ((residue2.chain_id, residue2.resid, bond_atom3),
+                 (new_ligand_id, ligand_resid, bond_atom4))
+        Returns:
+          A tuple of (list of bonded atom pairs, list of newly generated ligand chain IDs).
+        """
+        bond_pairs = []
+        ligand_ids = []
+        ligand_resid = 1
+        id_to_chain = {chain.id: chain for chain in self.chains}
+        # for residue1, residue2 in self.residue_pairs:
+        for (chain_id1, resid1), (chain_id2, resid2) in self.residue_pairs:
+            # For RNA compatibility we just need to remove the matching of
+            # three letter code to one letter code, the rest is automatically 
+            # handled by the link definitions
+            residue1 = xutils.Residue(
+                chain_id1,
+                resid1,
+                residue_names.PROTEIN_COMMON_ONE_TO_THREE[
+                    id_to_chain[chain_id1].sequence[resid1 - 1]
+                ]
+            )
+            residue2 = xutils.Residue(
+                chain_id2,
+                resid2,
+                id_to_chain[chain_id2].sequence[resid2 - 1]
             )
 
             bond1_atom1, bond1_atom2, bond2_atom1, bond2_atom2 = \

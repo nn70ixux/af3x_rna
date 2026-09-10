@@ -1430,9 +1430,12 @@ class Input:
       return chain
 
   def expand_links(self) -> Self:
-    """Expands crosslinks into bonded atom pairs.
+    """
+    Expands crosslinks into bonded atom pairs.
     For disulfide bonds, apply mutations to the protein chains
     because disulfide bonds are represented as covalent S-S ligands bound to Ala residues.
+
+    This function is the main function for defining and handling crosslinks
     """
 
     all_links = list(self.crosslinks or [])
@@ -1489,9 +1492,21 @@ class Input:
               chains=out_chains,
               residue_pairs=linkset["residue_pairs"],
           )
-          bond_pairs, new_ligand_ids = handler.create_bonded_atom_pairs(
-              used_chain_ids=used_chain_ids
-          )
+          if link_def.name.startswith("RNA"):
+              # Use a different function for parsing the atom bond pairs.
+              # The only change is that it does not need to check against the three letter code
+              bond_pairs, new_ligand_ids = handler.create_bonded_atom_pairs_rna(
+                      used_chain_ids = used_chain_ids
+                      )
+          elif link_def.name.startswith("PRNA"):
+              # Go into PRNA parsing
+              bond_pairs, new_ligand_ids = handler.create_bonded_atom_pairs_prna(
+                      used_chain_ids,
+                      )
+          else:    
+              bond_pairs, new_ligand_ids = handler.create_bonded_atom_pairs(
+                      used_chain_ids=used_chain_ids
+                      )
           bonded_atom_pairs.extend(bond_pairs)
           for lid in new_ligand_ids:
               ligand_entry["ligand"]["id"].append(lid)
@@ -1502,7 +1517,6 @@ class Input:
                 out_chains.append(
                     Ligand(id=ligand_id, ccd_ids=[ligand["ligand"]["ccdCode"]])
                 )
-
     return dataclasses.replace(
         self,
         chains=out_chains,
